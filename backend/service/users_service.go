@@ -7,10 +7,11 @@ import (
 	errs "neighbor_help/pkg/error"
 	"neighbor_help/pkg/token"
 	"neighbor_help/utils"
-	"net/http"
+	"neighbor_help/utils/validator"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type UsersService struct {
@@ -24,8 +25,9 @@ func implUsersService(repo contract.UsersRepository) *UsersService {
 }
 
 func (u *UsersService) Register(payload *dto.UsersRequest) (*dto.UsersResponse, error) {
-	if payload.Username == "" || payload.Password == "" || payload.FullName == "" || payload.Address == "" {
-		return nil, errs.BadRequest("Username, password, full name, and address are required")
+	err := validator.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
 	}
 
 	if payload.Coordinate_lat == 0 || payload.Coordinate_long == 0 {
@@ -82,6 +84,11 @@ func (u *UsersService) Register(payload *dto.UsersRequest) (*dto.UsersResponse, 
 }
 
 func (u *UsersService) Login(payload *dto.LoginRequest) (*dto.LoginResponse, error) {
+	err := validator.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
+	}
+
 	user, err := u.UserRepository.GetUserByUsername(payload.Username)
 	if err != nil {
 		return nil, errs.NotFound("User Not Found, Please register first")
@@ -106,6 +113,11 @@ func (u *UsersService) Login(payload *dto.LoginRequest) (*dto.LoginResponse, err
 }
 
 func (u *UsersService) UpdateUser(username string, usernameParam string, payload *dto.UpdateUserRequest) (*dto.UsersResponse, error) {
+	err := validator.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
+	}
+
 	user, err := u.UserRepository.GetUserByUsername(username)
 	if err != nil {
 		return nil, errs.NotFound("User Not Found")

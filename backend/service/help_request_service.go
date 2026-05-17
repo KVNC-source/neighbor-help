@@ -7,6 +7,8 @@ import (
 	"neighbor_help/models"
 	errs "neighbor_help/pkg/error"
 	"neighbor_help/utils"
+	"neighbor_help/utils/validator"
+
 	"net/http"
 	"time"
 )
@@ -26,8 +28,9 @@ func implHelpRequestService(helpRepo contract.HelpRequestRepository, usersRepo c
 }
 
 func (s *HelpRequestService) CreateHelpRequest(userID uint, payload *dto.HelpRequest) (*dto.HelpRequestResponse, error) {
-	if payload.Title == "" || payload.Description == "" || payload.Category == "" {
-		return nil, errs.BadRequest("Title, Description, Category cannot be empty")
+	err := validator.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
 	}
 
 	if payload.Category != "urgent" && payload.Category != "normal" {
@@ -155,6 +158,11 @@ func (s *HelpRequestService) GetNearbyHelpRequests(username string) (*dto.Nearby
 }
 
 func (s *HelpRequestService) UpdateHelpRequest(userID uint, helpRequestID uint, payload *dto.UpdateHelpRequest) (*dto.BasicResponse, error) {
+	err := validator.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
+	}
+
 	helpReq, err := s.HelpRequestRepository.GetHelpRequestByID(helpRequestID)
 	if err != nil {
 		return nil, errs.InternalServerError("Failed to get help request")

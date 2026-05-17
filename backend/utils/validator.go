@@ -1,6 +1,9 @@
 package utils
 
-import "regexp"
+import (
+	"regexp"
+	"go-playground/validator/v10"
+)
 
 func IsValidUsername(username string) bool {
 	if len(username) < 3 || len(username) > 30 {
@@ -32,3 +35,9 @@ func IsValidPassword(password string) bool {
 
 	return hasUpper && hasLower && hasNumber && hasSpecialChar && hasMinLen
 }
+
+func ValidateStruct(s interface{}) error {
+	validate := validator.New()
+	return validate.Struct(s)
+}
+
