@@ -27,66 +27,64 @@ func implHelpRequestService(helpRepo contract.HelpRequestRepository, usersRepo c
 }
 
 func (s *HelpRequestService) CreateHelpRequest(userID uint, payload *dto.HelpRequest) (*dto.HelpRequestResponse, error) {
-	err := utils.ValidateStruct(payload)
-	if err != nil {
-		return nil, errs.BadRequest("Invalid request payload")
-	}
+    err := utils.ValidateStruct(payload)
+    if err != nil {
+        return nil, errs.BadRequest("Invalid request payload")
+    }
 
-	if payload.Category != "urgent" && payload.Category != "normal" {
-		return nil, errs.BadRequest("Category must be 'urgent' or 'normal'")
-	}
+    if payload.Category != "urgent" && payload.Category != "normal" {
+        return nil, errs.BadRequest("Category must be 'urgent' or 'normal'")
+    }
 
-	category := models.Normal
+    category := models.Normal
+    if payload.Category == "urgent" {
+        category = models.Urgent
+    }
+    
+    status := models.Pending
+    username := s.UsersRepository.GetUsernameByID(userID)
 
-	if payload.Category == "urgent" {
-		category = models.Urgent
-	} else {
-		category = models.Normal
-	}
-	status := models.Pending
+    helpRequest := &models.HelpRequest{
+        Username:    username,
+        UserID:      userID,
+        Title:       payload.Title,
+        Description: payload.Description,
+        Category:    category,
+        Status:      status,
+    }
 
-	helpRequest := &models.HelpRequest{
-		ID:          payload.UserID,
-		UserID:      userID,
-		Username:    s.UsersRepository.GetUsernameByID(userID),
-		Title:       payload.Title,
-		Description: payload.Description,
-		Category:    category,
-		Status:      status,
-	}
+    err = s.HelpRequestRepository.CreateHelpRequest(helpRequest)
+    if err != nil {
+        return nil, err
+    }
 
-	err = s.NotificationRepository.CreateNotification(&models.Notifications{
-		HelpRequestID: &helpRequest.ID,
-		UserID:        &helpRequest.UserID,
-		Title:         fmt.Sprintf("New help request: %s", helpRequest.Title),
-		Username:      s.UsersRepository.GetUsernameByID(userID),
-		IsRead:        false,
-		Created_at:    time.Now(),
-	})
-	if err != nil {
-		return nil, err
-	}
+    err = s.NotificationRepository.CreateNotification(&models.Notifications{
+        HelpRequestID: &helpRequest.ID,
+        UserID:        &helpRequest.UserID,
+        Title:         fmt.Sprintf("New help request: %s", helpRequest.Title),
+        Username:      username,
+        IsRead:        false,
+        Created_at:    time.Now(),
+    })
+    if err != nil {
+        return nil, err
+    }
 
-	err = s.HelpRequestRepository.CreateHelpRequest(helpRequest)
-	if err != nil {
-		return nil, err
-	}
+    response := []dto.HelpRequestData{{
+        ID:          helpRequest.ID,
+        Username:    helpRequest.Username,
+        UserID:      uint(helpRequest.UserID),
+        Title:       helpRequest.Title,
+        Description: helpRequest.Description,
+        Category:    string(helpRequest.Category),
+        Status:      string(helpRequest.Status),
+    }}
 
-	response := []dto.HelpRequestData{{
-		ID:          helpRequest.ID,
-		Username:    helpRequest.Username,
-		UserID:      uint(helpRequest.UserID),
-		Title:       helpRequest.Title,
-		Description: helpRequest.Description,
-		Category:    string(helpRequest.Category),
-		Status:      string(helpRequest.Status),
-	}}
-
-	return &dto.HelpRequestResponse{
-		Status:       http.StatusOK,
-		Message:      "Help request created successfully",
-		HelpRequests: response,
-	}, nil
+    return &dto.HelpRequestResponse{
+        Status:       http.StatusOK,
+        Message:      "Help request created successfully",
+        HelpRequests: response,
+    }, nil
 }
 
 func (s *HelpRequestService) GetAllHelpRequests() (*dto.HelpRequestResponse, error) {
