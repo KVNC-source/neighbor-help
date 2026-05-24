@@ -7,11 +7,11 @@ import (
 	errs "neighbor_help/pkg/error"
 	"neighbor_help/pkg/token"
 	"neighbor_help/utils"
-	"neighbor_help/utils/validator"
+
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type UsersService struct {
@@ -25,7 +25,7 @@ func implUsersService(repo contract.UsersRepository) *UsersService {
 }
 
 func (u *UsersService) Register(payload *dto.UsersRequest) (*dto.UsersResponse, error) {
-	err := validator.ValidateStruct(payload)
+	err := utils.ValidateStruct(payload)
 	if err != nil {
 		return nil, errs.BadRequest("Invalid request payload")
 	}
@@ -84,7 +84,7 @@ func (u *UsersService) Register(payload *dto.UsersRequest) (*dto.UsersResponse, 
 }
 
 func (u *UsersService) Login(payload *dto.LoginRequest) (*dto.LoginResponse, error) {
-	err := validator.ValidateStruct(payload)
+	err := utils.ValidateStruct(payload)
 	if err != nil {
 		return nil, errs.BadRequest("Invalid request payload")
 	}
@@ -113,7 +113,7 @@ func (u *UsersService) Login(payload *dto.LoginRequest) (*dto.LoginResponse, err
 }
 
 func (u *UsersService) UpdateUser(username string, usernameParam string, payload *dto.UpdateUserRequest) (*dto.UsersResponse, error) {
-	err := validator.ValidateStruct(payload)
+	err := utils.ValidateStruct(payload)
 	if err != nil {
 		return nil, errs.BadRequest("Invalid request payload")
 	}
@@ -196,10 +196,10 @@ func (u *UsersService) GetUsers() (*dto.AllUsersResponse, error) {
 	response := &dto.AllUsersResponse{
 		Status:  http.StatusOK,
 		Message: "Users retrieved successfully",
-		Users:   []dto.UsersData{},
+		Data:    []dto.UsersData{},
 	}
 	for _, user := range users {
-		response.Users = append(response.Users, dto.UsersData{
+		response.Data = append(response.Data, dto.UsersData{
 			ID:              user.ID,
 			Username:        user.Username,
 			FullName:        user.FullName,

@@ -104,7 +104,7 @@ func (u *UserController) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  users.Status,
 		"message": users.Message,
-		"users":   users.Users,
+		"data":    users.Data,
 	})
 }
 
@@ -125,7 +125,7 @@ func (u *UserController) GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  response.Status,
 		"message": response.Message,
-		"user":    response.Data,
+		"data":    response.Data,
 	})
 }
 

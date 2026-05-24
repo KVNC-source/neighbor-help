@@ -31,13 +31,16 @@ func Load() {
 	if env == "" || (env != "development" && env != "production" && env != "testing") {
 		env = "development"
 	}
-	
 
 	config = &Config{
-		Port:      getEnv("PORT", "3000"),
+		Port:      getEnv("PORT", "3030"),
 		Env:       env,
 		DBUrl:     buildDbUrl(env),
 		JWTSecret: os.Getenv("JWT_SECRET"),
+	}
+
+	if config.Port == "" {
+		config.Port = "3030"
 	}
 }
 
@@ -53,7 +56,7 @@ func buildDbUrl(env string) string {
 	
 	dbName := os.Getenv("DB_DEV_NAME")
 	if env == "testing" {
-		dbName = os.Getenv("DB_TESTING_NAME")
+		dbName = os.Getenv("DB_TEST_NAME")
 	}
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)

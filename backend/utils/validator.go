@@ -2,7 +2,7 @@ package utils
 
 import (
 	"regexp"
-	"go-playground/validator/v10"
+	"github.com/go-playground/validator/v10"
 )
 
 func IsValidUsername(username string) bool {

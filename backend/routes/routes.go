@@ -66,6 +66,7 @@ func SetupRoutes(s *contract.Service) *gin.Engine {
 		api.GET("/health", healthController.GetStatus)
 		api.POST("/register", userController.Register)
 		api.POST("/login", userController.Login)
+		api.GET("/users", userController.GetUsers)
 	}
 
 	auth := r.Group("/")
@@ -75,7 +76,7 @@ func SetupRoutes(s *contract.Service) *gin.Engine {
 		api.GET("/ws/help/:id/chat", chatController.JoinChat)
 
 		// User
-		auth.GET("/users", userController.GetUsers)
+		// auth.GET("/users", userController.GetUsers)
 		auth.GET("/user/:id", userController.GetUserByID)
 		auth.PUT("/user/:username", userController.UpdateUser)
 		auth.GET("/nearby", userController.GetNearbyUsers)

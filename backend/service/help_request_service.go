@@ -7,7 +7,6 @@ import (
 	"neighbor_help/models"
 	errs "neighbor_help/pkg/error"
 	"neighbor_help/utils"
-	"neighbor_help/utils/validator"
 
 	"net/http"
 	"time"
@@ -28,7 +27,7 @@ func implHelpRequestService(helpRepo contract.HelpRequestRepository, usersRepo c
 }
 
 func (s *HelpRequestService) CreateHelpRequest(userID uint, payload *dto.HelpRequest) (*dto.HelpRequestResponse, error) {
-	err := validator.ValidateStruct(payload)
+	err := utils.ValidateStruct(payload)
 	if err != nil {
 		return nil, errs.BadRequest("Invalid request payload")
 	}
@@ -56,7 +55,7 @@ func (s *HelpRequestService) CreateHelpRequest(userID uint, payload *dto.HelpReq
 		Status:      status,
 	}
 
-	err := s.NotificationRepository.CreateNotification(&models.Notifications{
+	err = s.NotificationRepository.CreateNotification(&models.Notifications{
 		HelpRequestID: &helpRequest.ID,
 		UserID:        &helpRequest.UserID,
 		Title:         fmt.Sprintf("New help request: %s", helpRequest.Title),
@@ -72,7 +71,7 @@ func (s *HelpRequestService) CreateHelpRequest(userID uint, payload *dto.HelpReq
 	if err != nil {
 		return nil, err
 	}
-	
+
 	response := []dto.HelpRequestData{{
 		ID:          helpRequest.ID,
 		Username:    helpRequest.Username,
@@ -158,7 +157,7 @@ func (s *HelpRequestService) GetNearbyHelpRequests(username string) (*dto.Nearby
 }
 
 func (s *HelpRequestService) UpdateHelpRequest(userID uint, helpRequestID uint, payload *dto.UpdateHelpRequest) (*dto.BasicResponse, error) {
-	err := validator.ValidateStruct(payload)
+	err := utils.ValidateStruct(payload)
 	if err != nil {
 		return nil, errs.BadRequest("Invalid request payload")
 	}
