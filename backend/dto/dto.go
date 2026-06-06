@@ -46,7 +46,7 @@ type UsersResponse struct {
 type AllUsersResponse struct {
 	Status  int         `json:"status"`
 	Message string      `json:"message"`
-	Users   []UsersData `json:"users"`
+	Data    []UsersData `json:"users"`
 }
 
 

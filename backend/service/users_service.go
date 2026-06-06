@@ -7,6 +7,7 @@ import (
 	errs "neighbor_help/pkg/error"
 	"neighbor_help/pkg/token"
 	"neighbor_help/utils"
+
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -106,6 +107,11 @@ func (u *UsersService) Login(payload *dto.LoginRequest) (*dto.LoginResponse, err
 }
 
 func (u *UsersService) UpdateUser(username string, usernameParam string, payload *dto.UpdateUserRequest) (*dto.UsersResponse, error) {
+	err := utils.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
+	}
+
 	user, err := u.UserRepository.GetUserByUsername(username)
 	if err != nil {
 		return nil, errs.NotFound("User Not Found")
@@ -184,10 +190,10 @@ func (u *UsersService) GetUsers() (*dto.AllUsersResponse, error) {
 	response := &dto.AllUsersResponse{
 		Status:  http.StatusOK,
 		Message: "Users retrieved successfully",
-		Users:   []dto.UsersData{},
+		Data:    []dto.UsersData{},
 	}
 	for _, user := range users {
-		response.Users = append(response.Users, dto.UsersData{
+		response.Data = append(response.Data, dto.UsersData{
 			ID:              user.ID,
 			Username:        user.Username,
 			FullName:        user.FullName,

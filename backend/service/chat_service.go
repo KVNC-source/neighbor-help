@@ -6,6 +6,8 @@ import (
 	"neighbor_help/dto"
 	"neighbor_help/models"
 	errs "neighbor_help/pkg/error"
+	"neighbor_help/utils"
+
 	"net/http"
 	"time"
 )
@@ -94,8 +96,9 @@ func (s *chatService) ValidateChatAccess(userID uint, requestID uint) (*dto.Chat
 }
 
 func (s *chatService) SaveMessage(payload *dto.CreateMessageRequest) (*dto.SavedMessage, error) {
-	if payload.Content == "" {
-		return nil, errs.BadRequest("Message cannot be empty")
+	err := utils.ValidateStruct(payload)
+	if err != nil {
+		return nil, errs.BadRequest("Invalid request payload")
 	}
 
 	if _, err := s.ValidateChatAccess(payload.SenderID, payload.RequestID); err != nil {
